@@ -16,9 +16,6 @@ pub fn is_match(self: *const Self, haystack: ?[]const u8) bool {
         return self.match_null;
     }
 
-    if (self.regex) {
-    }
-
     const matched = blk: {
         if (self.regex) {
             const pattern = mvzr.compile(self.str) orelse return false;

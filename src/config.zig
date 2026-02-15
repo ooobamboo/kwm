@@ -468,8 +468,8 @@ pub fn reload() field_mask(Self) {
                 if (@field(mask, field.name)) {
                     break :blk true;
                 }
-                break :blk false;
             }
+            break :blk false;
         };
 
         if (modified) {

@@ -19,3 +19,11 @@ pub const PlacePosition = union(enum) {
     above: *river.NodeV1,
     below: *river.NodeV1,
 };
+
+pub const BarArea = enum {
+    tags,
+    layout,
+    mode,
+    title,
+    status,
+};

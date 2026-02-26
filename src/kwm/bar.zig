@@ -13,6 +13,7 @@ const river = wayland.client.river;
 const pixman = @import("pixman");
 const fcft = @import("fcft");
 
+const types = @import("types.zig");
 const Config = @import("config");
 
 const utils = @import("utils.zig");
@@ -25,14 +26,6 @@ const Buffer = @import("bar/buffer.zig");
 const Component = @import("bar/component.zig");
 
 pub var status_buffer = [1]u8 { 0 } ** 256;
-pub const Area = enum {
-    tags,
-    layout,
-    mode,
-    title,
-    status,
-};
-
 
 font: *fcft.Font,
 
@@ -49,7 +42,7 @@ scale: u32,
 background_damaged: bool = true,
 hidden: bool,
 
-dynamic_splits_buffer: [@typeInfo(Area).@"enum".fields.len-2]i32 = undefined,
+dynamic_splits_buffer: [@typeInfo(types.BarArea).@"enum".fields.len-2]i32 = undefined,
 static_splits: std.ArrayList(i32) = .empty,
 dynamic_splits: std.ArrayList(i32) = undefined,
 
@@ -155,7 +148,7 @@ pub fn handle_click(self: *Self, seat: *Seat) void {
     }
 
     x -= self.static_component_width();
-    for (&[_]Area { .layout, .mode, .title }, self.dynamic_splits.items) |area, split| {
+    for (&[_]types.BarArea { .layout, .mode, .title }, self.dynamic_splits.items) |area, split| {
         if (x <= split) {
             action = config.bar.click.getter.get(area).getter.get(seat.button) orelse return;
             return;

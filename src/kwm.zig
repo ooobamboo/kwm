@@ -9,7 +9,6 @@ const wl = wayland.client.wl;
 const utils = @import("kwm/utils.zig");
 const types = @import("kwm/types.zig");
 const binding = @import("kwm/binding.zig");
-const Bar = @import("kwm/bar.zig");
 const Window = @import("kwm/window.zig");
 const Context = @import("kwm/context.zig");
 const InputDevice = @import("kwm/input_device.zig");
@@ -23,7 +22,7 @@ const FDType = enum {
 };
 
 pub const layout = @import("kwm/layout.zig");
-pub const BarArea = Bar.Area;
+pub const BarArea = types.BarArea;
 pub const BindingAction = binding.Action;
 pub const XkbBindingEvent = binding.XkbBinding.Event;
 pub const PointerBindingEvent = binding.PointerBinding.Event;

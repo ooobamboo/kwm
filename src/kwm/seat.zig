@@ -605,16 +605,6 @@ fn handle_actions(self: *Self) void {
                     }
                 }
             },
-            .toggle_scroller_master_location => {
-                if (context.current_output) |output| {
-                    if (output.current_layout() == .scroller) {
-                        config.layout.scroller.master_location = switch (config.layout.scroller.master_location) {
-                            .left => .center,
-                            .center => .left,
-                        };
-                    }
-                }
-            },
             .toggle_auto_swallow => {
                 config.auto_swallow = !config.auto_swallow;
             },

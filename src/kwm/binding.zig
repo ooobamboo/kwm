@@ -70,7 +70,6 @@ pub const Action = union(enum) {
     modify_gap: struct { step: i32 },
     modify_tile_master_location: struct { location: layout.tile.MasterLocation },
     toggle_grid_direction,
-    toggle_scroller_master_location,
     toggle_auto_swallow,
 
     reload_config,

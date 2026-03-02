@@ -7,16 +7,10 @@ const Context = @import("../context.zig");
 const Output = @import("../output.zig");
 const Window = @import("../window.zig");
 
-pub const MasterLocation = enum {
-    left,
-    center,
-};
-
 
 outer_gap: i32,
 inner_gap: i32,
 mfact: f32,
-master_location: MasterLocation,
 
 
 pub fn arrange(self: *const Self, output: *Output) void {

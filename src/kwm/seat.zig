@@ -521,10 +521,18 @@ fn handle_actions(self: *Self) void {
             },
             .zoom => {
                 if (context.focused_window()) |window| {
-                    std.debug.assert(window.output != null);
-
-                    context.shift_to_head(window);
-                    context.focus(window);
+                    if (window.output) |output| {
+                        switch (output.current_layout()) {
+                            .tile => {
+                                context.shift_to_head(window);
+                                context.focus(window);
+                            },
+                            .scroller => {
+                                window.scroller_x = @divFloor(output.width-window.width, 2);
+                            },
+                            else => {}
+                        }
+                    }
                 }
             },
             .switch_layout => |data| {

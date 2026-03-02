@@ -33,11 +33,19 @@ pub fn arrange(self: *const Self, output: *Output) void {
         @as(f32, @floatFromInt(available_width)) * focus_top.scroller_mfact
     );
     const height = available_height - 2*self.outer_gap;
-    const master_x = switch (self.master_location) {
-        .left => self.outer_gap,
-        .center => @divFloor(available_width-master_width, 2),
-    };
+    var master_x: i32 = undefined;
     const y = self.outer_gap;
+
+    if (focus_top.scroller_x) |x| {
+        if (x < self.outer_gap) {
+            master_x = self.outer_gap;
+        } else if (x > output.width-self.outer_gap-master_width) {
+            master_x = output.width - self.outer_gap - master_width;
+        } else master_x = x;
+    } else {
+        master_x = self.outer_gap;
+    }
+    focus_top.scroller_x = master_x;
 
     focus_top.unbound_move(master_x, y);
     focus_top.unbound_resize(master_width, height);
@@ -51,17 +59,15 @@ pub fn arrange(self: *const Self, output: *Output) void {
             if (!window.is_visible_in(output) or window.floating) continue;
 
             x -= self.inner_gap;
-            if (x <= 0) {
-                window.hide();
-            } else {
-                const width: i32 = @intFromFloat(
-                    @as(f32, @floatFromInt(available_width)) * window.scroller_mfact
-                );
 
-                x -= width;
-                window.unbound_move(x, y);
-                window.unbound_resize(width, height);
-            }
+            const width: i32 = @intFromFloat(
+                @as(f32, @floatFromInt(available_width)) * window.scroller_mfact
+            );
+
+            x -= width;
+            window.scroller_x = x;
+            window.unbound_move(x, y);
+            window.unbound_resize(width, height);
         }
     }
 
@@ -74,17 +80,15 @@ pub fn arrange(self: *const Self, output: *Output) void {
             if (!window.is_visible_in(output) or window.floating) continue;
 
             x += self.inner_gap;
-            if (x >= available_width) {
-                window.hide();
-            } else {
-                const width: i32 = @intFromFloat(
-                    @as(f32, @floatFromInt(available_width)) * window.scroller_mfact
-                );
 
-                window.unbound_move(x, y);
-                window.unbound_resize(width, height);
-                x += width;
-            }
+            const width: i32 = @intFromFloat(
+                @as(f32, @floatFromInt(available_width)) * window.scroller_mfact
+            );
+
+            window.scroller_x = x;
+            window.unbound_move(x, y);
+            window.unbound_resize(width, height);
+            x += width;
         }
     }
 }

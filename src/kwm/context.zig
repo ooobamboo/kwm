@@ -512,6 +512,7 @@ pub fn send_to_output(self: *Self, window: *Window, direction: types.Direction) 
                 },
                 else => {}
             }
+            window.set_tag(new_output.tag);
         }
     }
 }

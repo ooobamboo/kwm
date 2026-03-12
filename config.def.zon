@@ -52,7 +52,7 @@
                 .middle = null,
             },
             .title = .{
-                .left = .zoom,
+                .left = .{ .zoom = .{ .swap = false } },
                 .right = null,
                 .middle = null,
             },
@@ -418,7 +418,9 @@
                 .modifiers = .{ .mod4 = true },
                 .event = .{
                     .click = .{
-                        .pressed = .zoom,
+                        .pressed = .{
+                            .zoom = .{ .swap = true },
+                        },
                     },
                 },
             },

@@ -519,13 +519,45 @@ fn handle_actions(self: *Self) void {
                     window.toggle_swallow();
                 }
             },
-            .zoom => {
+            .zoom => |data| {
                 if (context.focused_window()) |window| {
                     if (window.output) |output| {
                         switch (output.current_layout()) {
                             .tile, .deck => {
-                                context.shift_to_head(window);
-                                context.focus(window);
+                                if (!data.swap) {
+                                    context.focus(window);
+                                    context.shift_to_head(window);
+                                    return;
+                                }
+
+                                var master = blk: {
+                                    var it = context.windows.safeIterator(.forward);
+                                    while (it.next()) |w| {
+                                        if (w.is_visible_in(output) and !w.floating) {
+                                            break :blk w;
+                                        }
+                                    }
+                                    return;
+                                };
+
+                                var new_master = if (window != master) window
+                                    else blk: {
+                                        var it = context.focus_stack.safeIterator(.forward);
+                                        while (it.next()) |w| {
+                                            if (w == master) continue;
+                                            if (w.is_visible_in(output) and !w.floating) {
+                                                break :blk w;
+                                            }
+                                        }
+                                        return;
+                                    };
+
+                                // ensure the old master immediately behind the new master in focus_stack
+                                context.focus(master);
+                                context.focus(new_master);
+
+                                // swap old master with new master
+                                master.link.swapWith(&new_master.link);
                             },
                             .scroller => window.scroller_x = .center,
                             else => {}

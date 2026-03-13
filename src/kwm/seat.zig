@@ -521,6 +521,8 @@ fn handle_actions(self: *Self) void {
             },
             .zoom => |data| {
                 if (context.focused_window()) |window| {
+                    if (window.floating) return;
+
                     if (window.output) |output| {
                         switch (output.current_layout()) {
                             .tile, .deck => {

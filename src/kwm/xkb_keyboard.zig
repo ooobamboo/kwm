@@ -113,18 +113,18 @@ fn apply_rule(self: *Self, rule: *const Config.XkbKeyboardRule) void {
         if (self.capslock != state) self.set_capslock(state);
     }
 
-    if (rule.layout) |layout| {
-        if (switch (layout) {
-            .index => |index| index != self.layout_index,
-            .name => |name| self.layout_name == null or mem.order(u8, name, self.layout_name.?) != .eq,
-        }) self.set_layout(layout);
-    }
-
     if (rule.keymap) |keymap| blk: {
         self.set_keymap(keymap) catch |err| {
             log.err("<{*}> set keymap failed: {}", .{ self, err });
             break :blk;
         };
+    }
+
+    if (rule.layout) |layout| {
+        if (switch (layout) {
+            .index => |index| index != self.layout_index,
+            .name => |name| self.layout_name == null or mem.order(u8, name, self.layout_name.?) != .eq,
+        }) self.set_layout(layout);
     }
 }
 

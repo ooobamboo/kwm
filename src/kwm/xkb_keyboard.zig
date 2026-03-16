@@ -137,6 +137,8 @@ fn apply_rule(self: *Self, rule: *const Config.XkbKeyboardRule) void {
         };
 
         keymap_updated = true;
+
+        if (self.layout.name) |name| utils.allocator.free(name);
         self.layout = .{};
     }
 

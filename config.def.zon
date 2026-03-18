@@ -33,7 +33,7 @@
         },
         .status = .{ .text = "^#ff0000ffk^#00ff00ffw^#0000ffffm" }, // .stdin or .{ .fifo = "fifo file path" }, could use ^#RGBA to switch text color, and use ^#! to switch back to default color
         // bar clicked callback
-        // each part support left/right/middle
+        // each part supports left/right/middle/side/extra/forward/back/task
         .click = .{
             .tags = .{
                 // could use 0 there because it will be replace with the tag clicked
@@ -59,7 +59,12 @@
             .status = .{
                 .left = null,
                 .right = null,
-                .middle = .{ .spawn = .{ .argv = .{ "foot" } } }
+                .middle = .{ .spawn = .{ .argv = .{ "foot" } } },
+                .side = null,
+                .extra = null,
+                .forward = null,
+                .back = null,
+                .task = null,
             },
         },
     },

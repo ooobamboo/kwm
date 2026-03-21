@@ -326,6 +326,8 @@ xcursor_theme: ?struct {
     size: u32,
 },
 
+background: ?u32,
+
 bar: struct {
     show_default: bool,
     position: enum {

@@ -291,6 +291,17 @@ pub fn reload_config(self: *Self) void {
         }
     }
 
+    if (comptime build_options.background_enabled) {
+        if (mask.background) {
+            {
+                var it = self.outputs.safeIterator(.forward);
+                while (it.next()) |output| {
+                    output.background.damage();
+                }
+            }
+        }
+    }
+
     if (comptime build_options.bar_enabled) {
         if (mask.bar) {
             self.stop_listening_status();
@@ -1008,12 +1019,17 @@ fn rwm_listener(rwm: *river.WindowManagerV1, event: river.WindowManagerV1.Event,
                 }
             }
 
+            if (comptime build_options.background_enabled) {
+                var it = context.outputs.safeIterator(.forward);
+                while (it.next()) |output| {
+                    output.background.render();
+                }
+            }
+
             if (comptime build_options.bar_enabled) {
-                {
-                    var it = context.outputs.safeIterator(.forward);
-                    while (it.next()) |output| {
-                        output.bar.render();
-                    }
+                var it = context.outputs.safeIterator(.forward);
+                while (it.next()) |output| {
+                    output.bar.render();
                 }
             }
 

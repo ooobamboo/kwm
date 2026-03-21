@@ -366,7 +366,7 @@ remember_floating_geometry: bool,
 
 auto_swallow: bool,
 
-default_attach_mode: kwm.WindowAttachMode,
+default_attach_mode: enum_struct(kwm.layout.Type, kwm.WindowAttachMode),
 
 default_window_decoration: kwm.WindowDecoration,
 

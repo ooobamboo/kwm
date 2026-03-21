@@ -86,7 +86,14 @@
     // .stack_top: for tile and deck layout
     // .above_focused
     // .below_focused
-    .default_attach_mode = .top,
+    .default_attach_mode = .{
+        .tile = .top,
+        .grid = .top,
+        .monocle = .top,
+        .deck = .stack_top,
+        .scroller = .below_focused,
+        .float = .top,
+    },
 
     // .csd
     // .ssd

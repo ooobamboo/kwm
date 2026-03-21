@@ -1027,7 +1027,13 @@ fn rwm_listener(rwm: *river.WindowManagerV1, event: river.WindowManagerV1.Event,
                 return;
             };
 
-            context.attach_window(window, config.default_attach_mode);
+            context.attach_window(
+                window,
+                config.default_attach_mode.getter.get(
+                    if (context.current_output) |output| output.current_layout()
+                    else config.layout.default,
+                ),
+            );
             context.focus(window);
         },
         .output => |data| {

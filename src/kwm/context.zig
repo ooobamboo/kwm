@@ -573,6 +573,48 @@ pub fn swap(self: *Self, direction: types.Direction) void {
 }
 
 
+pub fn attach_window(self: *Self, window: *Window, mode: types.WindowAttachMode) void {
+    log.debug("attach {*}: {s}", .{ window, @tagName(mode) });
+
+    const config = Config.get();
+
+    switch (mode) {
+        .top => self.windows.prepend(window),
+        .bottom => self.windows.append(window),
+        .stack_top => if (self.current_output) |output| {
+            const nmaster = switch (output.current_layout()) {
+                .tile => config.layout.tile.nmaster,
+                .deck => 1,
+                else => 0,
+            };
+
+            if (nmaster == 0) {
+                self.windows.prepend(window);
+            } else {
+                var link: *wl.list.Link = &self.windows.link;
+                defer link.insert(&window.link);
+
+                var i: i32 = 0;
+                var it = self.windows.safeIterator(.forward);
+                while (it.next()) |w| {
+                    if (!w.is_visible_in(output) or w.floating) continue;
+                    link = &w.link;
+                    i += 1;
+                    if (i == nmaster) break;
+                }
+            }
+        } else self.windows.prepend(window), // fallback to prepend if no output
+        else => if (self.focused_window()) |focused| {
+            switch (mode) {
+                .above_focused => focused.link.prev.?.insert(&window.link),
+                .below_focused => focused.link.insert(&window.link),
+                else => unreachable,
+            }
+        } else self.windows.prepend(window), // fallback to prepend if no focused
+    }
+}
+
+
 pub fn prepare_remove_output(self: *Self, output: *Output) void {
     log.debug("prepare to remove output {*}", .{ output });
 
@@ -985,7 +1027,13 @@ fn rwm_listener(rwm: *river.WindowManagerV1, event: river.WindowManagerV1.Event,
                 return;
             };
 
-            context.windows.prepend(window);
+            context.attach_window(
+                window,
+                config.default_attach_mode.getter.get(
+                    if (context.current_output) |output| output.current_layout()
+                    else config.layout.default,
+                ),
+            );
             context.focus(window);
         },
         .output => |data| {

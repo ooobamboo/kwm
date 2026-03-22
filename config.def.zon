@@ -81,6 +81,20 @@
 
     .auto_swallow = true,
 
+    // .top: stack top
+    // .bottom: stack bottom
+    // .stack_top: for tile and deck layout
+    // .above_focused
+    // .below_focused
+    .default_attach_mode = .{
+        .tile = .top,
+        .grid = .top,
+        .monocle = .top,
+        .deck = .stack_top,
+        .scroller = .below_focused,
+        .float = .top,
+    },
+
     // .csd
     // .ssd
     .default_window_decoration = .ssd,
@@ -974,6 +988,7 @@
     //      is_terminal: bool, if set true, means the window could be swallowed
     //      disable_swallow: bool, if set true, the window could not swallow any other windows
     //      scroller_mfact: f32, initial mfact of the window for scroller layout
+    //      attach_mode: like `default_attach_mode`, change attach_mode for window matched
     .window_rules = .{
         .{ .app_id = .{ .str = "", .match_null = true }, .floating = true },
         .{ .app_id = .{ .str = "zenity" }, .floating = true },

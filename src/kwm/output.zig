@@ -357,6 +357,7 @@ fn rwm_output_listener(rwm_output: *river.OutputV1, event: river.OutputV1.Event,
             output.height = data.height;
 
             if (comptime build_options.background_enabled) output.background.damage();
+            if (comptime build_options.bar_enabled) output.bar.damage(.all);
         },
         .position => |data| {
             log.debug("<{*}> new position: (x: {}, y: {})", .{ output, data.x, data.y });
@@ -365,6 +366,7 @@ fn rwm_output_listener(rwm_output: *river.OutputV1, event: river.OutputV1.Event,
             output.y = data.y;
 
             if (comptime build_options.background_enabled) output.background.damage();
+            if (comptime build_options.bar_enabled) output.bar.damage(.all);
         },
         .removed => {
             log.debug("<{*}> removed, name: {s}", .{ output, output.name orelse "" });

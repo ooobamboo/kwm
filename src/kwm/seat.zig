@@ -176,7 +176,7 @@ pub fn manage(self: *Self) void {
         // avoid cursor wrapping
         self.previous_focused = .{ .window = window };
 
-        context.focus(window);
+        context.focus(window, false);
     }
 
     self.handle_actions();
@@ -592,7 +592,7 @@ fn handle_actions(self: *Self) void {
             },
             .toggle_floating => {
                 if (context.focused_window()) |window| {
-                    window.toggle_floating();
+                    window.toggle_floating(null);
                 }
             },
             .toggle_sticky => {
@@ -613,7 +613,7 @@ fn handle_actions(self: *Self) void {
                         switch (output.current_layout()) {
                             .tile, .deck => {
                                 if (!data.swap) {
-                                    context.focus(window);
+                                    context.focus(window, true);
                                     context.shift_to_head(window);
                                     continue;
                                 }
@@ -623,8 +623,8 @@ fn handle_actions(self: *Self) void {
                                     else context.focused_before(window, true) orelse continue;
 
                                 // ensure the old master immediately behind the new master in focus_stack
-                                context.focus(master);
-                                context.focus(new_master);
+                                context.focus(master, true);
+                                context.focus(new_master, true);
 
                                 // swap old master with new master
                                 master.link.swapWith(&new_master.link);
@@ -645,6 +645,7 @@ fn handle_actions(self: *Self) void {
                                 context.focus(
                                     if (window != master) master
                                     else context.focused_before(window, true) orelse continue,
+                                    true,
                                 );
                             },
                             else => {}
@@ -756,7 +757,7 @@ fn window_interaction(self: *Self, window: *Window) void {
     // avoid cursor wrapping
     self.previous_focused = .{ .window = window };
 
-    context.focus(window);
+    context.focus(window, true);
 }
 
 
@@ -861,6 +862,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
             log.debug("<{*}> interaction with {*}", .{ seat, shell_surface });
 
             switch (shell_surface.type) {
+                .layer_marker => unreachable,
                 .bar => |bar| if (comptime build_options.bar_enabled) {
                     log.debug("<{*}> interaction with {*}", .{ seat, bar });
 

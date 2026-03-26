@@ -53,7 +53,7 @@ pub fn preprocess(allocator: mem.Allocator, file: fs.File) !std.ArrayList(u8) {
         switch (state) {
             .normal => {
                 if (if_pattern.isMatch(line)) {
-                    matched = (try match(line, &target)) orelse continue;
+                    matched = try match(line, &target);
                     save = matched;
                     state = .@"if";
                     continue;
@@ -73,7 +73,7 @@ pub fn preprocess(allocator: mem.Allocator, file: fs.File) !std.ArrayList(u8) {
                     if (matched) {
                         save = false;
                     } else {
-                        matched = (try match(line, &target)) orelse continue;
+                        matched = try match(line, &target);
                         save = matched;
                     }
                     state = .elif;
@@ -100,20 +100,39 @@ pub fn preprocess(allocator: mem.Allocator, file: fs.File) !std.ArrayList(u8) {
 }
 
 
-fn match(line: []const u8, target: *const Target) !?bool {
+fn match(line: []const u8, target: *const Target) !bool {
     var found_condition = false;
     inline for (@typeInfo(Target).@"struct".fields) |field_info| {
-        if (parse(line, field_info.name)) |str| {
+        if (parse(line, field_info.name++"=")) |str| {
             found_condition = true;
 
             const pattern = mvzr.compile(str) orelse return error.CompileFailed;
 
-            log.debug(field_info.name ++ ": try match {s} with {s}", .{ @field(target, field_info.name), str });
+            log.debug(field_info.name++": try match {s} with {s}", .{ @field(target, field_info.name), str });
 
             if (!pattern.isMatch(@field(target, field_info.name))) return false;
         }
     }
-    return if (found_condition) true else null;
+    if (parse(line, "env_contains:")) |str| {
+        found_condition = true;
+
+        if (posix.getenv(str) == null) return false;
+    }
+    if (parse(line, "env:")) |str| blk: {
+        found_condition = true;
+        log.debug("{s}", .{ str });
+
+        var it = mem.splitAny(u8, str, "=");
+        const key = mem.trim(u8, it.next() orelse break :blk, " ");
+        const value = mem.trim(u8, it.next() orelse break :blk, " ");
+        log.debug("key: {s}, value: {s}", .{ key, value });
+        if (posix.getenv(key)) |v| {
+            log.debug("v: {s}", .{ v });
+            if (mem.eql(u8, v, value)) break :blk;
+        }
+        return false;
+    }
+    return found_condition;
 }
 
 
@@ -121,10 +140,6 @@ fn parse(line: []const u8, name: []const u8) ?[]const u8 {
     var i = mem.indexOf(u8, line, name) orelse return null;
     i += name.len;
     const end = line.len - 2;
-
-    while (i < end and line[i] == ' ') : (i += 1) {}
-    if (line[i] != '=') return null;
-    i += 1;
 
     while (i < end and line[i] == ' ') : (i += 1) {}
     const start = i;

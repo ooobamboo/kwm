@@ -101,15 +101,19 @@ pub fn preprocess(allocator: mem.Allocator, file: fs.File) !std.ArrayList(u8) {
 
 
 fn match(line: []const u8, target: *const Target) !?bool {
+    var found_condition = false;
     inline for (@typeInfo(Target).@"struct".fields) |field_info| {
-        const str = parse(line, field_info.name) orelse return null;
-        const pattern = mvzr.compile(str) orelse return error.CompileFailed;
+        if (parse(line, field_info.name)) |str| {
+            found_condition = true;
 
-        log.debug(field_info.name ++ ": try match {s} with {s}", .{ @field(target, field_info.name), str });
+            const pattern = mvzr.compile(str) orelse return error.CompileFailed;
 
-        if (!pattern.isMatch(@field(target, field_info.name))) return false;
+            log.debug(field_info.name ++ ": try match {s} with {s}", .{ @field(target, field_info.name), str });
+
+            if (!pattern.isMatch(@field(target, field_info.name))) return false;
+        }
     }
-    return true;
+    return if (found_condition) true else null;
 }
 
 

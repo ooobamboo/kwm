@@ -52,6 +52,10 @@
             .url = "https://codeberg.org/ifreund/zig-pixman/archive/v0.3.0.tar.gz",
             .hash = "pixman-0.3.0-LClMnz2VAAAs7QSCGwLimV5VUYx0JFnX5xWU6HwtMuDX",
         },
+        .kwim = .{
+            .url = "https://github.com/kewuaa/kwim/archive/refs/tags/v0.1.0.tar.gz",
+            .hash = "kwim-0.1.0-Ewp5G9VaAgC9hGx_ABRRVHeAgl99goJkxSN4chWKspZe",
+        },
     },
     .paths = .{
         "build.zig",

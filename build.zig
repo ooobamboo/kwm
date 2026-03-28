@@ -36,9 +36,6 @@ pub fn build(b: *std.Build) void {
     scanner.addCustomProtocol(b.path("protocol/river-window-management-v1.xml"));
     scanner.addCustomProtocol(b.path("protocol/river-xkb-bindings-v1.xml"));
     scanner.addCustomProtocol(b.path("protocol/river-layer-shell-v1.xml"));
-    scanner.addCustomProtocol(b.path("protocol/river-input-management-v1.xml"));
-    scanner.addCustomProtocol(b.path("protocol/river-libinput-config-v1.xml"));
-    scanner.addCustomProtocol(b.path("protocol/river-xkb-config-v1.xml"));
 
     scanner.generate("wl_compositor", 4);
     scanner.generate("wl_subcompositor", 1);
@@ -51,9 +48,6 @@ pub fn build(b: *std.Build) void {
     scanner.generate("river_window_manager_v1", 4);
     scanner.generate("river_xkb_bindings_v1", 2);
     scanner.generate("river_layer_shell_v1", 1);
-    scanner.generate("river_input_manager_v1", 1);
-    scanner.generate("river_libinput_config_v1", 1);
-    scanner.generate("river_xkb_config_v1", 1);
 
     const wayland_mod = b.createModule(.{ .root_source_file = scanner.result });
     const xkbcommon_mod = b.dependency("xkbcommon", .{}).module("xkbcommon");
@@ -98,11 +92,10 @@ pub fn build(b: *std.Build) void {
         };
         break :blk b.path(default_config_path);
     };
-    const run_preprocess = b.option(bool, "preprocess", "if preprocess configuration file") orelse false;
     const default_config_mod = b.createModule(.{
         .target = target,
         .optimize = optimize,
-        .root_source_file = if (run_preprocess) blk: {
+        .root_source_file = blk: {
             const preprocess = b.addExecutable(.{
                 .name = "preprocess",
                 .root_module = b.createModule(.{
@@ -120,7 +113,7 @@ pub fn build(b: *std.Build) void {
             preprocess_run.addFileArg(config_path);
             preprocess_run.addArg("-o");
             break :blk preprocess_run.addOutputFileArg("config.zon");
-        } else config_path,
+        },
     });
     const config_mod = b.createModule(.{
         .target = target,
@@ -249,6 +242,13 @@ pub fn build(b: *std.Build) void {
     // step). By default the install prefix is `zig-out/` but can be overridden
     // by passing `--prefix` or `-p`.
     b.installArtifact(exe);
+
+    const install_kwim = b.option(bool, "install_kwim", "if to install kwim") orelse true;
+    kwm_options.addOption(bool, "install_kwim", install_kwim);
+    if (install_kwim) {
+        const kwim = b.dependency("kwim", .{}).artifact("kwim");
+        b.installArtifact(kwim);
+    }
 
     const man_page_install = b.addInstallFile(
         b.path("doc/kwm.1"),

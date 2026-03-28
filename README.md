@@ -64,7 +64,7 @@ zig build -Doptimize=ReleaseSafe
   copied from `config.def.zon` if missing)
 - `-Dbackground`: enable or disable the solid background (defaults to `false`)
 - `-Dbar`: enable or disable the status bar (defaults to `true`)
-- `-Dpreprocess`: enable or disable config preprocessing (defaults to `false`)
+- `-Dinstall_kwim`: if to install [kwim] (defaults to `true`).
 
 ## Install
 
@@ -153,6 +153,12 @@ export XKB_DEFAULT_OPTIONS=caps:swapescape,altwin:swap_alt_win
 
 See `man 7 xkeyboard-config` for all options.
 
+### Input Manager
+
+If `kwm` built with `-Dinstall_kwim` option, the [kwim] will be also be installed
+as a tool to manage input devices, and `kwm` will automatically run `kwim` at startup.
+You could use `kwim` to list input devices or apply single rule for devices.
+
 ## Acknowledgments
 Thanks to the following reference projects:
 
@@ -189,3 +195,4 @@ GPL-3.0-compatible.
 [swallow patch]: https://codeberg.org/dwl/dwl-patches/src/branch/main/patches/swallow/swallow.patch
 [mvzr]: https://github.com/mnemnion/mvzr
 [River's logo]: https://codeberg.org/river/river/src/branch/main/logo/logo.svg
+[kwim]: https://github.com/kewuaa/kwim

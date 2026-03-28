@@ -310,6 +310,13 @@ pub fn reload_config(self: *Self) void {
         }
     }
 
+    if (mask.output_rules) {
+        var it = self.outputs.safeIterator(.forward);
+        while (it.next()) |output| {
+            output.apply_rules();
+        }
+    }
+
     if (comptime build_options.background_enabled) {
         if (mask.background) {
             {

@@ -56,7 +56,7 @@ See the default [configuration](./config.def.zon) file for detailed features.
 
 Requires zig 0.15.x.
 
-```zig
+```
 zig build -Doptimize=ReleaseSafe
 ```
 
@@ -65,7 +65,30 @@ zig build -Doptimize=ReleaseSafe
 - `-Dbackground`: enable or disable the solid background (defaults to `false`)
 - `-Dbar`: enable or disable the status bar (defaults to `true`)
 - `-Dpreprocess`: enable or disable config preprocessing (defaults to `false`)
+
+## Install
+
+```
+zig build install -Doptimize=ReleaseSafe
+```
+
 - `--prefix`: specify the path to install files
+
+### ArchLinux
+
+`kwm` is available in [AUR](https://aur.archlinux.org/packages/kwm).
+
+```
+yay -S kwm
+```
+
+Thanks @ParadiseOfMagic for making the AUR package.
+
+### NixOS
+
+There is a [kwm module](https://github.com/rowsred/river_kwm_modules_nixos).
+
+Thanks @rowsred for making the module.
 
 ## Configuration
 

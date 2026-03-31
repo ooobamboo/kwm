@@ -1027,7 +1027,7 @@
         //
     },
 
-    // @if(env:kewuaa=super_hansome)
+    // @if(kewuaa=super_hansome)
     // input device rules
     // full scheme:
     //      name: rule pattern

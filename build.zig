@@ -246,7 +246,22 @@ pub fn build(b: *std.Build) void {
     const install_kwim = b.option(bool, "install_kwim", "if to install kwim") orelse true;
     kwm_options.addOption(bool, "install_kwim", install_kwim);
     if (install_kwim) {
-        const kwim = b.dependency("kwim", .{ .optimize = .ReleaseSafe }).artifact("kwim");
+        const path = blk: {
+            const path = config_path.getPath3(b, null);
+            break :blk
+                if (path.root_dir.path) |root_dir|
+                fs.path.join(b.allocator, &.{ root_dir, path.sub_path }) catch path.sub_path
+                else path.sub_path;
+        };
+        defer b.allocator.free(path);
+
+        const kwim = b.dependency(
+            "kwim",
+            .{
+                .optimize = optimize,
+                .kwm_config = path,
+            },
+        ).artifact("kwim");
         b.installArtifact(kwim);
     }
 

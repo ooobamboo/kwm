@@ -687,9 +687,21 @@ fn handle_actions(self: *Self) void {
             .modify_mfact => |data| {
                 if (context.current_output) |output| {
                     switch (output.current_layout()) {
-                        .tile => output.layout.tile.mfact = @min(1, @max(0, output.layout.tile.mfact+data.step)),
-                        .scroller => if (context.focus_top_in(output, false)) |window| {
-                            window.scroller_mfact = @min(1, @max(0, window.scroller_mfact+data.step));
+                        .tile => {
+                            const val = switch (data.change) {
+                                .set => |set| set,
+                                .step => |step| output.layout.tile.mfact + step,
+                            };
+                            output.layout.tile.mfact = @min(1, @max(0, val));
+                        },
+                        .scroller => {
+                            if (context.focus_top_in(output, false)) |window| {
+                                const val = switch (data.change) {
+                                    .set => |set| set,
+                                    .step => |step| window.scroller_mfact + step,
+                                };
+                                window.scroller_mfact = @min(1, @max(0, val));
+                            }
                         },
                         else => {},
                     }

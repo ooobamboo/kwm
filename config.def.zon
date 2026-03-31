@@ -791,7 +791,7 @@
                 .event = .{
                     .click = .{
                         .pressed = .{
-                            .modify_mfact = .{ .step = 0.01 },
+                            .modify_mfact = .{ .change = .{ .step = 0.01 } },
                         },
                     },
                 },
@@ -802,7 +802,7 @@
                 .event = .{
                     .click = .{
                         .pressed = .{
-                            .modify_mfact = .{ .step = -0.01 },
+                            .modify_mfact = .{ .change = .{ .step = -0.01 } },
                         },
                     },
                 },

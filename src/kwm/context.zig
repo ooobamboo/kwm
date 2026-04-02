@@ -531,6 +531,7 @@ pub fn swap(self: *Self, direction: types.Direction) void {
 
     if (self.focused_window()) |window| {
         if (window.floating) return;
+        if (window.fullscreen == .output) return;
 
         var win = window;
         while (true) {

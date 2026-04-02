@@ -703,6 +703,7 @@ pub fn render(self: *Self) void {
 
     if (
         self.hidden
+        or self.output == null
         or self.geometry_undefined
         or self.x - config.border.width >= self.output.?.width
         or self.x + self.width + config.border.width <= 0
@@ -713,6 +714,8 @@ pub fn render(self: *Self) void {
             log.debug("<{*}> out of range, hide", .{ self });
         if (self.geometry_undefined)
             log.debug("<{*}> geometry undefined, hidden", .{ self });
+        if (self.output == null)
+            log.debug("<{*}> has no output, hide", .{ self });
         self.rwm_window.hide();
         return;
     }

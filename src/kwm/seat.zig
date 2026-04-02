@@ -563,6 +563,11 @@ fn handle_actions(self: *Self) void {
             .swap => |data| {
                 context.swap(data.direction);
             },
+            .toggle_maximize => {
+                if (context.focused_window()) |window| {
+                    window.toggle_maximize();
+                }
+            },
             .toggle_fullscreen => |data| {
                 context.toggle_fullscreen(data.in_window);
             },

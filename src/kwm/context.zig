@@ -446,6 +446,11 @@ pub fn focus_iter(self: *Self, direction: types.Direction, skip: types.WindowIte
                     .floating => if (new_window.floating) continue,
                     .nonfloating => if (!new_window.floating) continue,
                 }
+
+                if (window.maximize) {
+                    window.toggle_maximize();
+                }
+
                 self.focus(new_window, true);
                 break;
             }

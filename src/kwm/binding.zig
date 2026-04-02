@@ -93,6 +93,7 @@ pub const Action = union(enum) {
             once_unbound_pressed,
         } = .disabled,
     },
+    toggle_maximize,
     toggle_fullscreen: struct {
         in_window: bool = false,
     },

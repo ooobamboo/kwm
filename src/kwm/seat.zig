@@ -594,7 +594,13 @@ fn handle_actions(self: *Self) void {
             },
             .set_window_tag => |data| {
                 if (context.focused_window()) |window| {
-                    window.set_tag(data.tag.of(.{ .window = window }));
+                    const new_tag = data.tag.of(.{ .window = window });
+                    window.set_tag(new_tag);
+                    if (data.focus_follow) {
+                        if (window.output) |output| {
+                            output.set_tag(new_tag);
+                        }
+                    }
                 }
             },
             .toggle_output_tag => |data| {

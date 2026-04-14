@@ -859,6 +859,8 @@ fn swallow(self: *Self, window: *Self) void {
 
     if (self.swallowing != null or window.swallowed_by != null) return;
 
+    if (!window.is_visible()) return;
+
     log.debug("<{*}> swallowing {*}", .{ self, window });
 
     self.swallowing = window;

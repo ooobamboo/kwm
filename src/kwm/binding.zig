@@ -33,41 +33,37 @@ const Tag = union(enum) {
             .output => |o| .{ o, o.tag },
             .window => |w| .{ w.output orelse return 0, w.tag },
         };
-        return
-            if (config.bar.tags) |area|
-                switch (self.*) {
-                    .tag => |tag| tag,
-                    .direction => |direction| utils.shift_tag(
-                        base_tag,
-                        ((@as(u32, 1) << @as(u5, @intCast(area.tags.len))) - 1),
-                        area.tags.len,
-                        direction,
-                    ),
-                    .occupied => |direction| utils.shift_tag(
-                        base_tag,
-                        output.occupied_tags(),
-                        area.tags.len,
-                        direction,
-                    ),
-                    .unoccupied => |direction| utils.shift_tag(
-                        base_tag,
-                        ~output.occupied_tags() & ((@as(u32, 1) << @as(u5, @intCast(area.tags.len))) - 1),
-                        area.tags.len,
-                        direction,
-                    ),
-                }
-            else
-                switch (self.*) {
-                    .tag => |tag| tag,
-                    inline else => |direction|
-                        switch (direction) {
-                            .forward => math.rotl(u32, base_tag, 1),
-                            .reverse => math.rotr(u32, base_tag, 1),
-                        }
-                };
+        return if (config.bar.tags) |area|
+            switch (self.*) {
+                .tag => |tag| tag,
+                .direction => |direction| utils.shift_tag(
+                    base_tag,
+                    ((@as(u32, 1) << @as(u5, @intCast(area.tags.len))) - 1),
+                    area.tags.len,
+                    direction,
+                ),
+                .occupied => |direction| utils.shift_tag(
+                    base_tag,
+                    output.occupied_tags(),
+                    area.tags.len,
+                    direction,
+                ),
+                .unoccupied => |direction| utils.shift_tag(
+                    base_tag,
+                    ~output.occupied_tags() & ((@as(u32, 1) << @as(u5, @intCast(area.tags.len))) - 1),
+                    area.tags.len,
+                    direction,
+                ),
+            }
+        else switch (self.*) {
+            .tag => |tag| tag,
+            inline else => |direction| switch (direction) {
+                .forward => math.rotl(u32, base_tag, 1),
+                .reverse => math.rotr(u32, base_tag, 1),
+            },
+        };
     }
 };
-
 
 pub const Action = union(enum) {
     quit: struct { exit_session: bool },
@@ -133,6 +129,8 @@ pub const Action = union(enum) {
     modify_mfact: struct { change: SetStep },
     modify_gap: struct { step: i32 },
     modify_master_location: struct { location: types.LayoutMasterLocation },
+    cycle_preset_mfact: struct { forward: bool },
+    reset_preset_mfact,
     toggle_grid_direction,
     toggle_auto_swallow,
 

@@ -23,7 +23,6 @@ const Window = @import("window.zig");
 const Context = @import("context.zig");
 const ShellSurface = @import("shell_surface.zig");
 
-
 link: wl.list.Link = undefined,
 
 wl_seat: ?*wl.Seat = null,
@@ -67,12 +66,11 @@ unhandled_actions: std.ArrayList(binding.Action) = undefined,
 xkb_bindings: std.StringHashMap(std.ArrayList(*binding.XkbBinding)) = undefined,
 pointer_bindings: std.StringHashMap(std.ArrayList(*binding.PointerBinding)) = undefined,
 
-
 pub fn create(rwm_seat: *river.SeatV1) !*Self {
     const seat = try utils.allocator.create(Self);
     errdefer utils.allocator.destroy(seat);
 
-    defer log.debug("<{*}> created", .{ seat });
+    defer log.debug("<{*}> created", .{seat});
 
     const context = Context.get();
 
@@ -100,9 +98,8 @@ pub fn create(rwm_seat: *river.SeatV1) !*Self {
     return seat;
 }
 
-
 pub fn destroy(self: *Self) void {
-    defer log.debug("<{*}> destroyed", .{ self });
+    defer log.debug("<{*}> destroyed", .{self});
 
     self.link.remove();
     if (self.wl_seat) |wl_seat| wl_seat.destroy();
@@ -118,7 +115,6 @@ pub fn destroy(self: *Self) void {
 
     utils.allocator.destroy(self);
 }
-
 
 pub fn toggle_bindings(self: *Self, mode: []const u8, flag: bool) void {
     log.debug("<{*}> toggle binding: (mode: {s}, flag: {})", .{ self, mode, flag });
@@ -144,23 +140,20 @@ pub fn toggle_bindings(self: *Self, mode: []const u8, flag: bool) void {
     }
 }
 
-
 pub inline fn op_start(self: *Self) void {
-    log.debug("<{*}> op begin", .{ self });
+    log.debug("<{*}> op begin", .{self});
 
     self.rwm_seat.opStartPointer();
 }
 
-
 pub inline fn op_end(self: *Self) void {
-    log.debug("<{*}> op end", .{ self });
+    log.debug("<{*}> op end", .{self});
 
     self.rwm_seat.opEnd();
 }
 
-
 pub fn manage(self: *Self) void {
-    defer log.debug("<{*}> managed", .{ self });
+    defer log.debug("<{*}> managed", .{self});
 
     defer self.pointer_position.new = false;
 
@@ -179,10 +172,10 @@ pub fn manage(self: *Self) void {
 
         context.focus(
             window,
-            !window.floating
-            and if (window.output) |output|
+            !window.floating and if (window.output) |output|
                 output.current_layout() != .float
-                else false,
+            else
+                false,
         );
     }
 
@@ -190,7 +183,7 @@ pub fn manage(self: *Self) void {
 
     if (self.chorded.state != .enabled) {
         if (self.chorded.state == .exiting) {
-            log.debug("<{*}> exiting chorded", .{ self });
+            log.debug("<{*}> exiting chorded", .{self});
 
             // restore mode
             self.toggle_bindings(context.mode, false);
@@ -207,23 +200,22 @@ pub fn manage(self: *Self) void {
             if (self.mode) |mode| self.toggle_bindings(mode, false);
 
             if (self.chorded.state == .entering) {
-                log.debug("<{*}> entering chorded", .{ self });
+                log.debug("<{*}> entering chorded", .{self});
 
                 self.chorded.state = .enabled;
             } else {
-                self.mode = fmt.bufPrint(&self.mode_buffer, "{s}", .{ context.mode }) catch unreachable;
+                self.mode = fmt.bufPrint(&self.mode_buffer, "{s}", .{context.mode}) catch unreachable;
             }
         }
     }
 
-    if (self.chorded.state == .enabled and self.chorded.quit_mode != .once_bound_pressed){
+    if (self.chorded.state == .enabled and self.chorded.quit_mode != .once_bound_pressed) {
         self.rwm_xkb_binding_seat.ensureNextKeyEaten();
     }
 }
 
-
 pub fn try_focus(self: *Self) void {
-    log.debug("<{*}> try focus", .{ self });
+    log.debug("<{*}> try focus", .{self});
 
     if (self.focus_exclusive) return;
 
@@ -253,17 +245,14 @@ pub fn try_focus(self: *Self) void {
                 }
 
                 self.wrap_cursor(.{ .window = window });
-            }
+            },
         }
 
         // if there are any window fullscreen on output, focus it first
-        self.rwm_seat.focusWindow((
-            (
-                if (window.output) |output|
-                    output.fullscreen_window()
-                else null
-            ) orelse window
-        ).rwm_window);
+        self.rwm_seat.focusWindow(((if (window.output) |output|
+            output.fullscreen_window()
+        else
+            null) orelse window).rwm_window);
     } else {
         if (context.current_output) |output| {
             defer self.previous_focused = .{ .output = output };
@@ -285,7 +274,6 @@ pub fn try_focus(self: *Self) void {
     }
 }
 
-
 pub fn append_action(self: *Self, action: binding.Action) void {
     log.debug("<{*}> append action: {s}", .{ self, @tagName(action) });
 
@@ -295,17 +283,13 @@ pub fn append_action(self: *Self, action: binding.Action) void {
     };
 }
 
-
 pub fn refresh_xursor_theme(self: *Self) void {
-    log.debug("<{*}> refresh xcursor theme", .{ self });
+    log.debug("<{*}> refresh xcursor theme", .{self});
 
     const config = Config.get();
 
     if (config.xcursor_theme) |xcursor_theme| {
-        log.debug(
-            "<{*}> set xcursor theme: (name: {s}, size: {})",
-            .{ self, xcursor_theme.name, xcursor_theme.size }
-        );
+        log.debug("<{*}> set xcursor theme: (name: {s}, size: {})", .{ self, xcursor_theme.name, xcursor_theme.size });
 
         const name = utils.allocator.dupeZ(u8, xcursor_theme.name) catch |err| {
             log.err("<{*}> dupeZ failed while set xcursor theme: {}", .{ self, err });
@@ -317,9 +301,8 @@ pub fn refresh_xursor_theme(self: *Self) void {
     }
 }
 
-
 pub fn create_bindings(self: *Self) void {
-    log.debug("<{*}> create bindings", .{ self });
+    log.debug("<{*}> create bindings", .{self});
 
     const config = Config.get();
 
@@ -338,7 +321,7 @@ pub fn create_bindings(self: *Self) void {
             binding.XkbBinding.create(
                 self,
                 keysym_from_name(key_binding.keysym) orelse {
-                    log.warn("ambiguous keysym name '{s}'", .{ key_binding.keysym });
+                    log.warn("ambiguous keysym name '{s}'", .{key_binding.keysym});
                     continue;
                 },
                 key_binding.modifiers,
@@ -413,9 +396,8 @@ pub fn create_bindings(self: *Self) void {
     }
 }
 
-
 pub fn clear_bindings(self: *Self) void {
-    log.debug("<{*}> clear bindings", .{ self });
+    log.debug("<{*}> clear bindings", .{self});
 
     {
         var it = self.xkb_bindings.iterator();
@@ -439,7 +421,6 @@ pub fn clear_bindings(self: *Self) void {
         self.pointer_bindings.clearRetainingCapacity();
     }
 }
-
 
 fn wrap_cursor(self: *Self, dest: union(enum) { window: *Window, output: *Output }) void {
     switch (dest) {
@@ -465,7 +446,6 @@ fn wrap_cursor(self: *Self, dest: union(enum) { window: *Window, output: *Output
     };
     self.rwm_seat.pointerWarp(x, y);
 }
-
 
 fn handle_actions(self: *Self) void {
     defer self.unhandled_actions.clearRetainingCapacity();
@@ -496,8 +476,8 @@ fn handle_actions(self: *Self) void {
                 if (context.focused_window()) |window| {
                     window.ensure_floating();
                     switch (data.step) {
-                        .horizontal => |offset| window.move(window.x+offset, null),
-                        .vertical => |offset| window.move(null, window.y+offset),
+                        .horizontal => |offset| window.move(window.x + offset, null),
+                        .vertical => |offset| window.move(null, window.y + offset),
                     }
                 }
             },
@@ -506,13 +486,13 @@ fn handle_actions(self: *Self) void {
                     window.ensure_floating();
                     switch (data.step) {
                         .horizontal => |offset| {
-                            window.move(window.x-@divFloor(offset, 2), null);
-                            window.resize(window.width+offset, null);
+                            window.move(window.x - @divFloor(offset, 2), null);
+                            window.resize(window.width + offset, null);
                         },
                         .vertical => |offset| {
-                            window.move(null, window.y-@divFloor(offset, 2));
-                            window.resize(null, window.height+offset);
-                        }
+                            window.move(null, window.y - @divFloor(offset, 2));
+                            window.resize(null, window.height + offset);
+                        },
                     }
                 }
             },
@@ -538,11 +518,11 @@ fn handle_actions(self: *Self) void {
                 if (data.auto_quit != .disabled) {
                     self.chorded.state = switch (self.chorded.state) {
                         .entering => {
-                            log.warn("<{*}> try repeatly entering chorded", .{ self });
+                            log.warn("<{*}> try repeatly entering chorded", .{self});
                             continue;
                         },
                         .enabled => {
-                            log.warn("<{*}> try recursively entering chorded", .{ self });
+                            log.warn("<{*}> try recursively entering chorded", .{self});
                             continue;
                         },
                         .exiting => blk: {
@@ -556,17 +536,14 @@ fn handle_actions(self: *Self) void {
                     };
                     self.chorded.quit_mode = switch (data.auto_quit) {
                         .disabled => unreachable,
-                        inline else => |mode| @field(
-                            @TypeOf(self.chorded.quit_mode),
-                            @tagName(mode)
-                        ),
+                        inline else => |mode| @field(@TypeOf(self.chorded.quit_mode), @tagName(mode)),
                     };
 
                     context.switch_mode(data.mode);
                 } else if (self.chorded.state == .disabled) {
                     context.switch_mode(data.mode);
                 } else {
-                    self.mode = fmt.bufPrint(&self.mode_buffer, "{s}", .{ data.mode }) catch unreachable;
+                    self.mode = fmt.bufPrint(&self.mode_buffer, "{s}", .{data.mode}) catch unreachable;
                 }
             },
             .focus_iter => |data| {
@@ -651,8 +628,7 @@ fn handle_actions(self: *Self) void {
                                 }
 
                                 var master = output.master_window() orelse continue;
-                                var new_master = if (window != master) window
-                                    else context.focused_before(window, true) orelse continue;
+                                var new_master = if (window != master) window else context.focused_before(window, true) orelse continue;
 
                                 // ensure the old master immediately behind the new master in focus_stack
                                 context.focus(master, true);
@@ -662,7 +638,7 @@ fn handle_actions(self: *Self) void {
                                 master.link.swapWith(&new_master.link);
                             },
                             .scroller => window.scroller_x = .center,
-                            else => {}
+                            else => {},
                         }
                     }
                 }
@@ -675,12 +651,11 @@ fn handle_actions(self: *Self) void {
                             .tile, .deck => {
                                 const master = output.master_window() orelse continue;
                                 context.focus(
-                                    if (window != master) master
-                                    else context.focused_before(window, true) orelse continue,
+                                    if (window != master) master else context.focused_before(window, true) orelse continue,
                                     true,
                                 );
                             },
-                            else => {}
+                            else => {},
                         }
                     }
                 }
@@ -710,7 +685,7 @@ fn handle_actions(self: *Self) void {
                     if (output.current_layout() == .tile) {
                         switch (data.change) {
                             .increase => output.layout.tile.nmaster += 1,
-                            .decrease => output.layout.tile.nmaster = @max(1, output.layout.tile.nmaster-1),
+                            .decrease => output.layout.tile.nmaster = @max(1, output.layout.tile.nmaster - 1),
                         }
                     }
                 }
@@ -741,12 +716,38 @@ fn handle_actions(self: *Self) void {
             .modify_gap => |data| {
                 if (context.current_output) |output| {
                     switch (output.current_layout()) {
-                        .tile => output.layout.tile.inner_gap = @max(config.border.width*2, output.layout.tile.inner_gap+data.step),
-                        .grid => output.layout.grid.inner_gap = @max(config.border.width*2, output.layout.grid.inner_gap+data.step),
-                        .monocle => output.layout.monocle.gap = @max(config.border.width*2, output.layout.monocle.gap+data.step),
-                        .deck => output.layout.deck.inner_gap = @max(config.border.width*2, output.layout.deck.inner_gap+data.step),
-                        .scroller => output.layout.scroller.inner_gap = @max(config.border.width*2, output.layout.scroller.inner_gap+data.step),
+                        .tile => output.layout.tile.inner_gap = @max(config.border.width * 2, output.layout.tile.inner_gap + data.step),
+                        .grid => output.layout.grid.inner_gap = @max(config.border.width * 2, output.layout.grid.inner_gap + data.step),
+                        .monocle => output.layout.monocle.gap = @max(config.border.width * 2, output.layout.monocle.gap + data.step),
+                        .deck => output.layout.deck.inner_gap = @max(config.border.width * 2, output.layout.deck.inner_gap + data.step),
+                        .scroller => output.layout.scroller.inner_gap = @max(config.border.width * 2, output.layout.scroller.inner_gap + data.step),
                         .float => {},
+                    }
+                }
+            },
+            .cycle_preset_mfact => |data| {
+                if (context.current_output) |output| {
+                    if (output.current_layout() == .scroller) {
+                        const scroller = &output.layout.scroller;
+                        if (scroller.preset_widths.len > 0) {
+                            if (scroller.cycle_preset_mfact(output, data.forward)) |new_mfact| {
+                                if (context.focus_top_in(output, false)) |window| {
+                                    window.scroller_mfact = @min(1, @max(0, new_mfact));
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            .reset_preset_mfact => {
+                if (context.current_output) |output| {
+                    if (output.current_layout() == .scroller) {
+                        const scroller = &output.layout.scroller;
+                        if (scroller.default_preset_mfact()) |default_mfact| {
+                            if (context.focus_top_in(output, false)) |window| {
+                                window.scroller_mfact = @min(1, @max(0, default_mfact));
+                            }
+                        }
                     }
                 }
             },
@@ -792,7 +793,6 @@ fn handle_actions(self: *Self) void {
     }
 }
 
-
 fn window_interaction(self: *Self, window: *Window) void {
     log.debug("<{*}> interaction with window {*}", .{ self, window });
 
@@ -803,7 +803,6 @@ fn window_interaction(self: *Self, window: *Window) void {
 
     context.focus(window, true);
 }
-
 
 fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *Self) void {
     std.debug.assert(rwm_seat == seat.rwm_seat);
@@ -820,23 +819,23 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
                 .move => |op_data| {
                     if (op_data.seat == seat) {
                         window.move(
-                            op_data.start_x+data.dx,
-                            op_data.start_y+data.dy,
+                            op_data.start_x + data.dx,
+                            op_data.start_y + data.dy,
                         );
                     }
                 },
                 .resize => |op_data| {
                     if (op_data.seat == seat) {
                         window.resize(
-                            op_data.start_width+data.dx,
-                            op_data.start_height+data.dy,
+                            op_data.start_width + data.dx,
+                            op_data.start_height + data.dy,
                         );
                     }
-                }
+                },
             }
         },
         .op_release => {
-            log.debug("<{*}> op release", .{ seat });
+            log.debug("<{*}> op release", .{seat});
 
             if (context.focused_window()) |window| {
                 switch (window.operator) {
@@ -850,7 +849,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
                         if (data.seat == seat) {
                             window.prepare_resize(null);
                         }
-                    }
+                    },
                 }
             } else {
                 log.debug("no window focused", .{});
@@ -861,9 +860,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
 
             const rwm_window = data.window orelse return;
 
-            const window: *Window = @ptrCast(
-                @alignCast(river.WindowV1.getUserData(rwm_window))
-            );
+            const window: *Window = @ptrCast(@alignCast(river.WindowV1.getUserData(rwm_window)));
 
             seat.window_below_pointer = .{
                 .window = window,
@@ -871,7 +868,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
             };
         },
         .pointer_leave => {
-            log.debug("<{*}> pointer leave", .{ seat });
+            log.debug("<{*}> pointer leave", .{seat});
 
             seat.window_below_pointer = .{};
         },
@@ -886,7 +883,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
             };
         },
         .removed => {
-            log.debug("<{*}> removed", .{ seat });
+            log.debug("<{*}> removed", .{seat});
 
             context.prepare_remove_seat(seat);
 
@@ -895,9 +892,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
         .shell_surface_interaction => |data| {
             log.debug("<{*}> shell surface interaction: {*}", .{ seat, data.shell_surface });
 
-            const shell_surface: *ShellSurface = @ptrCast(
-                @alignCast((data.shell_surface orelse return).getUserData())
-            );
+            const shell_surface: *ShellSurface = @ptrCast(@alignCast((data.shell_surface orelse return).getUserData()));
 
             log.debug("<{*}> interaction with {*}", .{ seat, shell_surface });
 
@@ -926,9 +921,7 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
         .window_interaction => |data| {
             log.debug("<{*}> window interaction: {*}", .{ seat, data.window });
 
-            const window: *Window = @ptrCast(
-                @alignCast(river.WindowV1.getUserData(data.window.?))
-            );
+            const window: *Window = @ptrCast(@alignCast(river.WindowV1.getUserData(data.window.?)));
 
             seat.window_interaction(window);
         },
@@ -942,45 +935,42 @@ fn rwm_seat_listener(rwm_seat: *river.SeatV1, event: river.SeatV1.Event, seat: *
     }
 }
 
-
 fn rwm_layer_shell_seat_listener(rwm_layer_shell_seat: *river.LayerShellSeatV1, event: river.LayerShellSeatV1.Event, seat: *Self) void {
     std.debug.assert(rwm_layer_shell_seat == seat.rwm_layer_shell_seat);
 
     switch (event) {
         .focus_exclusive => {
-            log.debug("<{*}> focus exclusive", .{ seat });
+            log.debug("<{*}> focus exclusive", .{seat});
 
             seat.focus_exclusive = true;
         },
         .focus_non_exclusive => {
-            log.debug("<{*}> focus non exclusive", .{ seat });
+            log.debug("<{*}> focus non exclusive", .{seat});
         },
         .focus_none => {
-            log.debug("<{*}> focus none", .{ seat });
+            log.debug("<{*}> focus none", .{seat});
 
             seat.focus_exclusive = false;
-        }
+        },
     }
 }
-
 
 fn rwm_xkb_binding_seat_listener(rwm_xkb_binding_seat: *river.XkbBindingsSeatV1, event: river.XkbBindingsSeatV1.Event, seat: *Self) void {
     std.debug.assert(rwm_xkb_binding_seat == seat.rwm_xkb_binding_seat);
 
     switch (event) {
         .ate_unbound_key => {
-            log.debug("<{*}> ate_unbound_key", .{ seat });
+            log.debug("<{*}> ate_unbound_key", .{seat});
 
             std.debug.assert(seat.chorded.state == .enabled);
 
             switch (seat.chorded.quit_mode) {
                 .once_pressed, .once_unbound_pressed => seat.chorded.state = .exiting,
-                .once_bound_pressed => {}
+                .once_bound_pressed => {},
             }
-        }
+        },
     }
 }
-
 
 fn wl_seat_listener(wl_seat: *wl.Seat, event: wl.Seat.Event, seat: *Self) void {
     std.debug.assert(wl_seat == seat.wl_seat);
@@ -1024,10 +1014,9 @@ fn wl_seat_listener(wl_seat: *wl.Seat, event: wl.Seat.Event, seat: *Self) void {
                     config_path orelse Config.path,
                 });
             }
-        }
+        },
     }
 }
-
 
 fn wl_pointer_listener(wl_pointer: *wl.Pointer, event: wl.Pointer.Event, seat: *Self) void {
     std.debug.assert(wl_pointer == seat.wl_pointer);
@@ -1038,22 +1027,21 @@ fn wl_pointer_listener(wl_pointer: *wl.Pointer, event: wl.Pointer.Event, seat: *
 
             seat.button = @enumFromInt(data.button);
         },
-        else => {}
+        else => {},
     }
 }
-
 
 // https://codeberg.org/river/river-classic/src/commit/f0908e2d117ede7114fa85c65622b055c565c250/river/command/map.zig#L254
 fn keysym_from_name(name: []const u8) ?u32 {
     const n = utils.allocator.dupeZ(u8, name) catch |err| {
-        log.err("dupeZ failed while call keysym_from_name: {}", .{ err });
+        log.err("dupeZ failed while call keysym_from_name: {}", .{err});
         return null;
     };
     defer utils.allocator.free(n);
 
     const keysym = Keysym.fromName(n, .case_insensitive);
     if (keysym == .NoSymbol) {
-        log.err("invalid keysym `{s}`", .{ name });
+        log.err("invalid keysym `{s}`", .{name});
         return null;
     }
 
@@ -1063,7 +1051,7 @@ fn keysym_from_name(name: []const u8) ?u32 {
         } else if (mem.eql(u8, name, "XF86ScreenSaver")) {
             return Keysym.XF86ScreenSaver;
         } else {
-            log.err("ambiguous keysym name '{s}'", .{ name });
+            log.err("ambiguous keysym name '{s}'", .{name});
             return null;
         }
     }

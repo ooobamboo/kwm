@@ -61,9 +61,9 @@
             // mode tags show on bar
             // display full mode string by default
             .tags = .{
-                .{ "default", "" },         // hide mode tag in default mode
-                .{ "passthrough", "P" },    // only show "P" on bar in passthrough mode
-                .{ "floating", "F" },       // only show "F" on bar in floating mode
+                .{ "default", "" }, // hide mode tag in default mode
+                .{ "passthrough", "P" }, // only show "P" on bar in passthrough mode
+                .{ "floating", "F" }, // only show "F" on bar in floating mode
             },
 
             .click = .{
@@ -112,7 +112,7 @@
             .data = .{ .text = "^#ff0000ffk^#00ff00ffw^#0000ffffm" }, // .stdin or .{ .fifo = "fifo file path" }, could use ^#RGBA to switch text color, and use ^#! to switch back to default color
 
             .click = .{
-                .middle = .{ .spawn = .{ .argv = .{ "foot" } } },
+                .middle = .{ .spawn = .{ .argv = .{"foot"} } },
             },
         },
 
@@ -142,16 +142,11 @@
             //
 
             // set scheme for mode tag
-            .{
-                .area = .{ .mode = null },
-                .scheme = .{
-                    .normal = .{
-                        .fg = 0x444a73ff,
-                        .bg = 0xc8d3f5d0,
-                    }
-                }
-            },
-        }
+            .{ .area = .{ .mode = null }, .scheme = .{ .normal = .{
+                .fg = 0x444a73ff,
+                .bg = 0xc8d3f5d0,
+            } } },
+        },
     },
 
     .sloppy_focus = false,
@@ -242,6 +237,7 @@
             .mfact = 0.5,
             .inner_gap = 16,
             .outer_gap = 9,
+            .preset_widths = .{ 0.33333, 0.5, 0.66667, 1.0 },
         },
     },
 
@@ -964,6 +960,37 @@
                 },
             },
             .{
+                .keysym = "r",
+                .modifiers = .{ .mod4 = true },
+                .event = .{
+                    .click = .{
+                        .pressed = .{
+                            .cycle_preset_mfact = .{ .forward = true },
+                        },
+                    },
+                },
+            },
+            .{
+                .keysym = "r",
+                .modifiers = .{ .mod4 = true, .shift = true },
+                .event = .{
+                    .click = .{
+                        .pressed = .{
+                            .cycle_preset_mfact = .{ .forward = false },
+                        },
+                    },
+                },
+            },
+            .{
+                .keysym = "r",
+                .modifiers = .{ .mod4 = true, .ctrl = true },
+                .event = .{
+                    .click = .{
+                        .pressed = .reset_preset_mfact,
+                    },
+                },
+            },
+            .{
                 .keysym = "a",
                 .modifiers = .{ .mod4 = true, .shift = true },
                 .event = .{
@@ -999,7 +1026,7 @@
                 .event = .{
                     .click = .{
                         .pressed = .{
-                            .spawn = .{ .argv = .{ "foot" } },
+                            .spawn = .{ .argv = .{"foot"} },
                         },
                     },
                 },
@@ -1151,10 +1178,7 @@
     //      disable_while_typing: .enabled or .disabled
     //      disable_while_trackpointing: .enabled or .disabled
     //      rotation_angle: u32
-    .libinput_device_rules = .{
-        .{ .name = .{ .str = ".*[tT]ouchpad", .regex = true }, .tap = .enabled, .drag = .enabled, .natural_scroll = .enabled },
-        .{ .tap = .enabled, .drag = .enabled }
-    },
+    .libinput_device_rules = .{ .{ .name = .{ .str = ".*[tT]ouchpad", .regex = true }, .tap = .enabled, .drag = .enabled, .natural_scroll = .enabled }, .{ .tap = .enabled, .drag = .enabled } },
 
     // xkb_keyboard rules
     // full scheme:

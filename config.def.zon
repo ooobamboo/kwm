@@ -1014,7 +1014,7 @@
                 .event = .{
                     .click = .{
                         .pressed = .{
-                            .spawn = .{ .argv = .{ "qutebrowser" } },
+                            .spawn_shell = .{ .cmd = "$BROWSER" },
                         },
                     },
                 },

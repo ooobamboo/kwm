@@ -1119,7 +1119,7 @@
                 .event = .{
                     .click = .{
                         .pressed = .{
-                            .spawn_shell = .{ .cmd = "footclient -T Floating_Term fzkill" },
+                            .spawn_shell = .{ .cmd = "footclient btop" },
                         },
                     },
                 },
@@ -1153,17 +1153,6 @@
                     .click = .{
                         .pressed = .{
                             .spawn_shell = .{ .cmd = "fnottctl dismiss" },
-                        },
-                    },
-                },
-            },
-            .{
-                .keysym = "f",
-                .modifiers = .{ .mod4 = true, .ctrl = true, .shift = true },
-                .event = .{
-                    .click = .{
-                        .pressed = .{
-                            .spawn_shell = .{ .cmd = "${HOME}/.local/bin/fztrans" },
                         },
                     },
                 },

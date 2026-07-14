@@ -1191,17 +1191,6 @@
             },
             .{
                 .keysym = "y",
-                .modifiers = .{ .mod4 = true, .mod1 = true },
-                .event = .{
-                    .click = .{
-                        .pressed = .{
-                            .spawn_shell = .{ .cmd = "${HOME}/.local/bin/shot --window" },
-                        },
-                    },
-                },
-            },
-            .{
-                .keysym = "y",
                 .modifiers = .{ .mod4 = true, .ctrl = true, .shift = true },
                 .event = .{
                     .click = .{

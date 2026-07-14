@@ -19,7 +19,6 @@
         .{ "sh", "-c", "$HOME/.local/bin/dim" },
         .{ "wl-paste", "--watch", "cliphist", "store" },
         .{ "foot", "-s" },
-        .{ "sh", "-c", "rm -f $XDG_RUNTIME_DIR/wob.fifo && mkfifo $XDG_RUNTIME_DIR/wob.fifo && tail -f $XDG_RUNTIME_DIR/wob.fifo | wob" },
         .{ "sh", "-c", "$HOME/.local/bin/setbg $HOME/.local/share/wallpaper" },
     },
 
